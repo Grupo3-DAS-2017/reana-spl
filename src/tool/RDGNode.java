@@ -145,6 +145,19 @@ public class RDGNode {
     	Map<RDGNode, Boolean> marks = new HashMap<RDGNode, Boolean>();
     	topoSortVisit(this, marks, transitiveDependencies);
     }
+    
+    private static boolean isRunningTopologicalSort(RDGNode node, Map<RDGNode, Boolean> marks) {
+    	boolean isRunning = false;
+
+    	if (marks.containsKey(node) && marks.get(node) == false) {
+	        // Visiting temporarily marked node -- this means a cyclic dependency!
+	        throw new CyclicRdgException();
+	    } else if (!marks.containsKey(node)) {
+	    	isRunning = true;
+	    }
+
+	    return isRunning;
+    }
 
     /**
      * Topological sort {@code visit} function (Cormen et al.'s algorithm).
@@ -154,10 +167,7 @@ public class RDGNode {
      * @throws CyclicRdgException
      */
     private void topoSortVisit(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted) throws CyclicRdgException {
-        if (marks.containsKey(node) && marks.get(node) == false) {
-            // Visiting temporarily marked node -- this means a cyclic dependency!
-            throw new CyclicRdgException();
-        } else if (!marks.containsKey(node)) {
+        if (isRunningTopologicalSort(node,marks)){
             // Mark node temporarily (cycle detection)
             marks.put(node, false);
             for (RDGNode child: node.getDependencies()) {
@@ -192,10 +202,7 @@ public class RDGNode {
 
     // TODO Parameterize topological sort of RDG.
     private static Map<RDGNode, Integer> numPathsVisit(RDGNode node, Map<RDGNode, Boolean> marks, Map<RDGNode, Map<RDGNode, Integer>> cache) throws CyclicRdgException {
-        if (marks.containsKey(node) && marks.get(node) == false) {
-            // Visiting temporarily marked node -- this means a cyclic dependency!
-            throw new CyclicRdgException();
-        } else if (!marks.containsKey(node)) {
+    	if (isRunningTopologicalSort(node,marks)){
             // Mark node temporarily (cycle detection)
             marks.put(node, false);
 
