@@ -102,15 +102,24 @@ public class RDGNode {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj != null && obj instanceof RDGNode) {
-            RDGNode other = (RDGNode) obj;
-            return this.getPresenceCondition().equals(other.getPresenceCondition())
-                    && this.getFDTMC().equals(other.getFDTMC())
-                    && this.getDependencies().equals(other.getDependencies());
-        }
+        if (obj != null && obj instanceof RDGNode) { 
+            return this.isRDGNodeEqualsTo((RDGNode) obj);
+        } 
+        
         return false;
     }
-
+     
+    /**
+     * Check if another RDGNode object is equals to the target RDGNode object
+     * @param node
+     * @return boolean
+     */
+    private boolean isRDGNodeEqualsTo(RDGNode node) {
+    	return this.getPresenceCondition().equals(node.getPresenceCondition())
+                && this.getFDTMC().equals(node.getFDTMC())
+                && this.getDependencies().equals(node.getDependencies());
+    }
+    
     @Override
     public int hashCode() {
         return id.hashCode() + presenceCondition.hashCode() + fdtmc.hashCode() + dependencies.hashCode();
