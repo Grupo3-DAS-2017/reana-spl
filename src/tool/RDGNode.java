@@ -132,9 +132,18 @@ public class RDGNode {
      */
     public List<RDGNode> getDependenciesTransitiveClosure() throws CyclicRdgException {
         List<RDGNode> transitiveDependencies = new LinkedList<RDGNode>();
-        Map<RDGNode, Boolean> marks = new HashMap<RDGNode, Boolean>();
-        topoSortVisit(this, marks, transitiveDependencies);
+        executeTopologicalSortVisit(transitiveDependencies);
         return transitiveDependencies;
+    }
+    
+    /**
+     * Execute {@link #topoSortVisit(RDGNode, Map, List)} to get one sort graph
+     *
+     * @param transitiveDependencies
+     */
+    public void executeTopologicalSortVisit(List<RDGNode> transitiveDependencies) {
+    	Map<RDGNode, Boolean> marks = new HashMap<RDGNode, Boolean>();
+    	topoSortVisit(this, marks, transitiveDependencies);
     }
 
     /**
