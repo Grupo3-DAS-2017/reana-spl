@@ -141,9 +141,31 @@ public class RDGNode {
      */
     public List<RDGNode> getDependenciesTransitiveClosure() throws CyclicRdgException {
         List<RDGNode> transitiveDependencies = new LinkedList<RDGNode>();
-        Map<RDGNode, Boolean> marks = new HashMap<RDGNode, Boolean>();
-        topoSortVisit(this, marks, transitiveDependencies);
+        executeTopologicalSortVisit(transitiveDependencies);
         return transitiveDependencies;
+    }
+    
+    /**
+     * Execute {@link #topoSortVisit(RDGNode, Map, List)} to get one sort graph
+     *
+     * @param transitiveDependencies
+     */
+    public void executeTopologicalSortVisit(List<RDGNode> transitiveDependencies) {
+    	Map<RDGNode, Boolean> marks = new HashMap<RDGNode, Boolean>();
+    	topoSortVisit(this, marks, transitiveDependencies);
+    }
+    
+    private static boolean isRunningTopologicalSort(RDGNode node, Map<RDGNode, Boolean> marks) {
+    	boolean isRunning = false;
+
+    	if (marks.containsKey(node) && marks.get(node) == false) {
+	        // Visiting temporarily marked node -- this means a cyclic dependency!
+	        throw new CyclicRdgException();
+	    } else if (!marks.containsKey(node)) {
+	    	isRunning = true;
+	    }
+
+	    return isRunning;
     }
 
     /**
@@ -154,10 +176,7 @@ public class RDGNode {
      * @throws CyclicRdgException
      */
     private void topoSortVisit(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted) throws CyclicRdgException {
-        if (marks.containsKey(node) && marks.get(node) == false) {
-            // Visiting temporarily marked node -- this means a cyclic dependency!
-            throw new CyclicRdgException();
-        } else if (!marks.containsKey(node)) {
+        if (isRunningTopologicalSort(node,marks)){
             // Mark node temporarily (cycle detection)
             marks.put(node, false);
             for (RDGNode child: node.getDependencies()) {
@@ -177,21 +196,22 @@ public class RDGNode {
      */
     public Map<RDGNode, Integer> getNumberOfPaths() throws CyclicRdgException {
         Map<RDGNode, Integer> numberOfPaths = new HashMap<RDGNode, Integer>();
-
-        Map<RDGNode, Boolean> marks = new HashMap<RDGNode, Boolean>();
-        Map<RDGNode, Map<RDGNode, Integer>> cache = new HashMap<RDGNode, Map<RDGNode,Integer>>();
-        Map<RDGNode, Integer> tmpNumberOfPaths = numPathsVisit(this, marks, cache);
+        Map<RDGNode, Integer> tmpNumberOfPaths = getTmpNumberOfPaths();
+        
         numberOfPaths = sumPaths(numberOfPaths, tmpNumberOfPaths);
 
         return numberOfPaths;
     }
+    
+    private Map<RDGNode, Integer> getTmpNumberOfPaths(){
+    	Map<RDGNode, Boolean> marks = new HashMap<RDGNode, Boolean>();
+        Map<RDGNode, Map<RDGNode, Integer>> cache = new HashMap<RDGNode, Map<RDGNode,Integer>>();
+        return numPathsVisit(this, marks, cache);
+    }
 
     // TODO Parameterize topological sort of RDG.
     private static Map<RDGNode, Integer> numPathsVisit(RDGNode node, Map<RDGNode, Boolean> marks, Map<RDGNode, Map<RDGNode, Integer>> cache) throws CyclicRdgException {
-        if (marks.containsKey(node) && marks.get(node) == false) {
-            // Visiting temporarily marked node -- this means a cyclic dependency!
-            throw new CyclicRdgException();
-        } else if (!marks.containsKey(node)) {
+    	if (isRunningTopologicalSort(node,marks)){
             // Mark node temporarily (cycle detection)
             marks.put(node, false);
 
