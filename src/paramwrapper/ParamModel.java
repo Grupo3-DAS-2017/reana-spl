@@ -120,38 +120,62 @@ class ParamModel {
 
 	@Override
 	public String toString() {
+		String module = "dtmc\n\n";
+		
+		module += this.paramsToString();
+		module += this.modulesToString();
+		module += this.commandsToString();		
+		module += this.labelsToString();
+		
+		return module;
+	}
+	
+	public String modulesToString() {
+		return "\n" +
+				"module " + moduleName + "\n" +
+				"	"+stateVariable+ " : ["+stateRangeStart+".."+stateRangeEnd+"] init "+initialState+";" +
+				"\n";
+	}
+	
+	public String paramsToString() {
 		String params = "";
 		for (String parameter : parameters) {
 			params += "param double "+parameter+";\n";
 		}
-		String module =
-				"dtmc\n" +
-				"\n" +
-				params +
-				"\n" +
-				"module " + moduleName + "\n" +
-				"	"+stateVariable+ " : ["+stateRangeStart+".."+stateRangeEnd+"] init "+initialState+";" +
-				"\n";
+		
+		return params;
+	}
+	
+	public String commandsToString() {
+		String commandsString = "";
 		for (Command command : commands.values()) {
-			module += "	"+command.makeString(stateVariable) + "\n";
+			commandsString += "	"+command.makeString(stateVariable) + "\n";
 		}
-		module += "endmodule\n\n";
+		commandsString += "endmodule\n\n";
+		
+		return commandsString;
+	}
+	
+	public String labelsToString() {
+		String labelsString = "";
+		
 		for (Map.Entry<String, Set<Integer>> entry : labels.entrySet()) {
 			String label = entry.getKey();
-			module += "label \""+label+"\" = ";
+			labelsString += "label \""+label+"\" = ";
 
 			Set<Integer> states = entry.getValue();
 			int count = 1;
 			for (Integer state : states) {
-				module += stateVariable+"="+state;
+				labelsString += stateVariable+"="+state;
 				if (count < states.size()) {
-					module += " | ";
+					labelsString += " | ";
 				}
 				count++;
 			}
-			module += ";\n";
+			labelsString += ";\n";
 		}
-		return module;
+		
+		return labelsString;
 	}
 }
 
