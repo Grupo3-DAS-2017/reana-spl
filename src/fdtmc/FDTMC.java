@@ -119,19 +119,19 @@ public class FDTMC {
     }
 
 	public Transition createTransition(State source, State target, String action, String reliability) {
-	    if (source == null) {
+	    if (source == null) { // change for !source
 	        return null;
 	    }
 
-	    List<Transition> l = transitionSystem.get(source);
-		if (l == null) {
-			l = new LinkedList<Transition>();
+	    List<Transition> transitionList = transitionSystem.get(source);
+		if (transitionList == null) {
+			transitionList = new LinkedList<Transition>();
 		}
 
 		Transition newTransition = new Transition(source, target, action, reliability);
 		
-		transitionSystem.put(source, l);
-		return l.add(newTransition) ? newTransition : null;
+		transitionSystem.put(source, transitionList);
+		return transitionList.add(newTransition) ? newTransition : null;
 	}
 
 	/**
@@ -179,8 +179,7 @@ public class FDTMC {
 
 	public Transition getTransitionByActionName(String action) {
 		//para cada Lista de adjacencias de cada nodo
-		Collection<List<Transition>> stateAdjacencies = transitionSystem.values();
-		Iterator<List<Transition>> iteratorStateAdjacencies = stateAdjacencies.iterator();
+		Iterator<List<Transition>> iteratorStateAdjacencies = stateAdjacencies().iterator();
 		while (iteratorStateAdjacencies.hasNext()) {
 			List<Transition> transitions = iteratorStateAdjacencies.next();
 
@@ -195,6 +194,9 @@ public class FDTMC {
 		return null;
 	}
 
+	private Collection<List<Transition>> stateAdjacencies(){
+		return transitionSystem.values();
+	}
 
 	@Override
 	public String toString() {
