@@ -201,9 +201,8 @@ public class FDTMC {
 	@Override
 	public String toString() {
 		String msg = new String();
-
-		Set<State> tmpStates = this.transitionSystem.keySet();
-		Iterator <State> itStates = tmpStates.iterator();
+		Iterator <State> itStates = temporaryStates().iterator();
+		
 		while (itStates.hasNext()) {
 			State temp = itStates.next();
 			List<Transition> transitionList = this.transitionSystem.get(temp);
@@ -218,6 +217,9 @@ public class FDTMC {
 			}
 		}
 		return msg;
+	}
+	private Set<State> temporaryStates(){
+		return this.transitionSystem.keySet();
 	}
 
 	/**
