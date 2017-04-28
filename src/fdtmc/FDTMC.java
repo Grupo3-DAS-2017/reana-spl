@@ -119,19 +119,19 @@ public class FDTMC {
     }
 
 	public Transition createTransition(State source, State target, String action, String reliability) {
-	    if (source == null) {
+	    if (source == null) { // change for !source
 	        return null;
 	    }
 
-	    List<Transition> l = transitionSystem.get(source);
-		if (l == null) {
-			l = new LinkedList<Transition>();
+	    List<Transition> transitionList = transitionSystem.get(source);
+		if (transitionList == null) {
+			transitionList = new LinkedList<Transition>();
 		}
 
 		Transition newTransition = new Transition(source, target, action, reliability);
-		boolean success = l.add(newTransition);
-		transitionSystem.put(source, l);
-		return success ? newTransition : null;
+		
+		transitionSystem.put(source, transitionList);
+		return transitionList.add(newTransition) ? newTransition : null;
 	}
 
 	/**
@@ -179,8 +179,7 @@ public class FDTMC {
 
 	public Transition getTransitionByActionName(String action) {
 		//para cada Lista de adjacencias de cada nodo
-		Collection<List<Transition>> stateAdjacencies = transitionSystem.values();
-		Iterator<List<Transition>> iteratorStateAdjacencies = stateAdjacencies.iterator();
+		Iterator<List<Transition>> iteratorStateAdjacencies = stateAdjacencies().iterator();
 		while (iteratorStateAdjacencies.hasNext()) {
 			List<Transition> transitions = iteratorStateAdjacencies.next();
 
@@ -195,13 +194,15 @@ public class FDTMC {
 		return null;
 	}
 
+	private Collection<List<Transition>> stateAdjacencies(){
+		return transitionSystem.values();
+	}
 
 	@Override
 	public String toString() {
 		String msg = new String();
-
-		Set<State> tmpStates = this.transitionSystem.keySet();
-		Iterator <State> itStates = tmpStates.iterator();
+		Iterator <State> itStates = temporaryStates().iterator();
+		
 		while (itStates.hasNext()) {
 			State temp = itStates.next();
 			List<Transition> transitionList = this.transitionSystem.get(temp);
@@ -216,6 +217,9 @@ public class FDTMC {
 			}
 		}
 		return msg;
+	}
+	private Set<State> temporaryStates(){
+		return this.transitionSystem.keySet();
 	}
 
 	/**
@@ -332,13 +336,10 @@ public class FDTMC {
      */
     private Map<State, State> copyForInlining(FDTMC destination) {
         destination.variableName = this.getVariableName();
-
+        
         Map<State, State> statesMapping = destination.inlineStates(this);
-        destination.setInitialState(statesMapping.get(this.getInitialState()));
-        destination.setSuccessState(statesMapping.get(this.getSuccessState()));
-        destination.setErrorState(statesMapping.get(this.getErrorState()));
-
-        destination.inlineTransitions(this, statesMapping);
+        initStatesMaping(destination, statesMapping);
+        
         return statesMapping;
     }
 
@@ -349,17 +350,21 @@ public class FDTMC {
     private FDTMC copy() {
         FDTMC copied = new FDTMC();
         copied.variableName = this.getVariableName();
-
+        
         Map<State, State> statesMapping = copied.inlineStates(this);
-        copied.setInitialState(statesMapping.get(this.getInitialState()));
-        copied.setSuccessState(statesMapping.get(this.getSuccessState()));
-        copied.setErrorState(statesMapping.get(this.getErrorState()));
-
-        copied.inlineTransitions(this, statesMapping);
+        initStatesMaping(copied, statesMapping);
+        
         copied.inlineInterfaces(this, statesMapping);
         return copied;
     }
-
+    
+    private void initStatesMaping(FDTMC fdmct, Map<State, State> statesMaping){
+    	fdmct.setInitialState(statesMaping.get(this.getInitialState()));
+    	fdmct.setSuccessState(statesMaping.get(this.getSuccessState()));
+    	fdmct.setErrorState(statesMaping.get(this.getErrorState()));
+    	fdmct.inlineTransitions(this, statesMaping);
+    }
+    
     /**
      * Inlines all states from {@code fdtmc} stripped of their labels.
      * @param fdtmc
