@@ -17,10 +17,8 @@ public class FDTMC {
     public static final String SUCCESS_LABEL = "success";
     public static final String ERROR_LABEL = "error";
 
-	private Set<State> states;
-    private State initialState;
-    private State successState;
-    private State errorState;
+	private Set<State> statesSet;
+	private States states;
 	private String variableName;
 	private int index;
 	private Map<State, List<Transition>> transitionSystem;
@@ -28,8 +26,9 @@ public class FDTMC {
 
 
 	public FDTMC() {
-		states = new LinkedHashSet<State>();
-		initialState = null;
+		statesSet = new LinkedHashSet<State>();
+		states = new States();
+		states.initial = null;
 		variableName = null;
 		index = 0;
 		transitionSystem = new LinkedHashMap<State, List<Transition>>();
@@ -37,7 +36,7 @@ public class FDTMC {
 	}
 
 	public Collection<State> getStates() {
-		return states;
+		return statesSet;
 	}
 
 	public void setVariableName(String name) {
@@ -56,10 +55,10 @@ public class FDTMC {
 		State temp = new State();
 		temp.setVariableName(variableName);
 		temp.setIndex(index);
-		states.add(temp);
+		statesSet.add(temp);
 		transitionSystem.put(temp, null);
 		if (index == 0)
-			initialState = temp;
+			states.initial = temp;
 		index++;
 		return temp;
 	}
@@ -77,15 +76,15 @@ public class FDTMC {
     }
 
     private void setInitialState(State initialState) {
-        if (this.initialState != null) {
-            this.initialState.setLabel(null);
+        if (this.states.initial != null) {
+            this.states.initial.setLabel(null);
         }
-        this.initialState = initialState;
+        this.states.initial = initialState;
         initialState.setLabel(INITIAL_LABEL);
     }
 
     public State getInitialState() {
-        return initialState;
+        return states.initial;
     }
 
     public State createSuccessState() {
@@ -95,12 +94,12 @@ public class FDTMC {
     }
 
     private void setSuccessState(State successState) {
-        this.successState = successState;
+        this.states.success = successState;
         successState.setLabel(SUCCESS_LABEL);
     }
 
     public State getSuccessState() {
-        return successState;
+        return states.success;
     }
 
     public State createErrorState() {
@@ -110,12 +109,12 @@ public class FDTMC {
     }
 
     private void setErrorState(State errorState) {
-        this.errorState = errorState;
+        this.states.error = errorState;
         errorState.setLabel(ERROR_LABEL);
     }
 
     public State getErrorState() {
-        return errorState;
+        return states.error;
     }
 
 	public Transition createTransition(State source, State target, String action, String reliability) {
@@ -168,7 +167,7 @@ public class FDTMC {
 	}
 
 	public State getStateByLabel(String label) {
-		Iterator <State> it = states.iterator();
+		Iterator <State> it = statesSet.iterator();
 		while (it.hasNext()){
 			State s = it.next();
 			if (s.getLabel().equals(label))
@@ -236,7 +235,7 @@ public class FDTMC {
 	        FDTMC other = (FDTMC) obj;
 	        LinkedList<List<Interface>> thisInterfaces = new LinkedList<List<Interface>>(interfaces.values());
             LinkedList<List<Interface>> otherInterfaces = new LinkedList<List<Interface>>(other.interfaces.values());
-            return states.equals(other.states)
+            return statesSet.equals(other.statesSet)
 	                && getInitialState().equals(other.getInitialState())
 	                && getSuccessState().equals(other.getSuccessState())
 	                && getErrorState().equals(other.getErrorState())
@@ -248,7 +247,7 @@ public class FDTMC {
 
 	@Override
     public int hashCode() {
-        return states.hashCode() + transitionSystem.hashCode() + interfaces.hashCode();
+        return statesSet.hashCode() + transitionSystem.hashCode() + interfaces.hashCode();
     }
 
     public Map<State, List<Transition>> getTransitions() {

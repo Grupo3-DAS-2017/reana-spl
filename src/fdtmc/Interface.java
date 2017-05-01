@@ -7,31 +7,38 @@ package fdtmc;
  */
 public class Interface {
     private String abstractedId;
-    private State initial;
-    private State success;
-    private State error;
+    private States states;
     private Transition successTransition;
     private Transition errorTransition;
 
     public Interface(String abstractedId, State initial, State success, State error, Transition successTransition, Transition errorTransition) {
-        this.abstractedId = abstractedId;
-        this.initial = initial;
-        this.success = success;
-        this.error = error;
+        this.states = new States();
+    	this.abstractedId = abstractedId;
+        this.states.initial = initial;
+        this.states.success = success;
+        this.states.error = error;
         this.successTransition = successTransition;
         this.errorTransition = errorTransition;
     }
 
-    public State getInitial() {
-        return initial;
+    public States getStates() {
+		return states;
+	}
+
+	public void setStates(States states) {
+		this.states = states;
+	}
+
+	public State getInitial() {
+        return states.initial;
     }
 
     public State getSuccess() {
-        return success;
+        return states.success;
     }
 
     public State getError() {
-        return error;
+        return states.error;
     }
 
     public Transition getSuccessTransition() {
@@ -53,9 +60,9 @@ public class Interface {
     public boolean equals(Object obj) {
         if (obj != null && obj instanceof Interface) {
             Interface other = (Interface) obj;
-            return initial.equals(other.initial)
-                    && success.equals(other.success)
-                    && error.equals(other.error)
+            return states.initial.equals(other.states.initial)
+                    && states.success.equals(other.states.success)
+                    && states.error.equals(other.states.error)
                     && successTransition.equals(other.successTransition)
                     && errorTransition.equals(other.errorTransition);
         }
@@ -64,9 +71,9 @@ public class Interface {
 
     @Override
     public int hashCode() {
-        return initial.hashCode()
-                + success.hashCode()
-                + error.hashCode()
+        return states.initial.hashCode()
+                + states.success.hashCode()
+                + states.error.hashCode()
                 + successTransition.hashCode()
                 + errorTransition.hashCode();
     }
