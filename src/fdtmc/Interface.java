@@ -14,9 +14,9 @@ public class Interface {
     public Interface(String abstractedId, State initial, State success, State error, Transition successTransition, Transition errorTransition) {
         this.states = new States();
     	this.abstractedId = abstractedId;
-        this.states.initial = initial;
-        this.states.success = success;
-        this.states.error = error;
+        this.states.setInitial(initial);
+        this.states.setSuccess(success);
+        this.states.setError(error);
         this.successTransition = successTransition;
         this.errorTransition = errorTransition;
     }
@@ -30,15 +30,15 @@ public class Interface {
 	}
 
 	public State getInitial() {
-        return states.initial;
+        return states.getInitial();
     }
 
     public State getSuccess() {
-        return states.success;
+        return states.getSuccess();
     }
 
     public State getError() {
-        return states.error;
+        return states.getError();
     }
 
     public Transition getSuccessTransition() {
@@ -60,9 +60,9 @@ public class Interface {
     public boolean equals(Object obj) {
         if (obj != null && obj instanceof Interface) {
             Interface other = (Interface) obj;
-            return states.initial.equals(other.states.initial)
-                    && states.success.equals(other.states.success)
-                    && states.error.equals(other.states.error)
+            return states.getInitial().equals(other.states.getInitial())
+                    && states.getSuccess().equals(other.states.getSuccess())
+                    && states.getError().equals(other.states.getError())
                     && successTransition.equals(other.successTransition)
                     && errorTransition.equals(other.errorTransition);
         }
@@ -71,9 +71,9 @@ public class Interface {
 
     @Override
     public int hashCode() {
-        return states.initial.hashCode()
-                + states.success.hashCode()
-                + states.error.hashCode()
+        return states.getInitial().hashCode()
+                + states.getSuccess().hashCode()
+                + states.getError().hashCode()
                 + successTransition.hashCode()
                 + errorTransition.hashCode();
     }
