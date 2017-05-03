@@ -56,7 +56,7 @@ public class RDGNodeTest {
         RDGNode memory = BSNNodes.getMemoryRDGNode();
         RDGNode file = BSNNodes.getFileRDGNode();
 
-        Map<RDGNode, Integer> numberOfPaths = situation.getNumberOfPaths();
+        Map<RDGNode, Integer> numberOfPaths = TopologicalSortPaths.getNumberOfPaths(situation);
 
         Assert.assertEquals(2, numberOfPaths.get(sqlite).intValue());
         Assert.assertEquals(2, numberOfPaths.get(memory).intValue());

@@ -16,6 +16,7 @@ public class RDGNode {
 	//This reference is used to store all the RDGnodes created during the evaluation
 	private static Map<String, RDGNode> rdgNodes = new HashMap<String, RDGNode>();
 	private static List<RDGNode> nodesInCreationOrder = new LinkedList<RDGNode>();
+	private TopologicalSort topologicalSort = new TopologicalSort();
 
     private static int lastNodeIndex = 0;
 
@@ -102,15 +103,24 @@ public class RDGNode {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj != null && obj instanceof RDGNode) {
-            RDGNode other = (RDGNode) obj;
-            return this.getPresenceCondition().equals(other.getPresenceCondition())
-                    && this.getFDTMC().equals(other.getFDTMC())
-                    && this.getDependencies().equals(other.getDependencies());
-        }
+        if (obj != null && obj instanceof RDGNode) { 
+            return this.isRDGNodeEqualsTo((RDGNode) obj);
+        } 
+        
         return false;
     }
-
+     
+    /**
+     * Check if another RDGNode object is equals to the target RDGNode object
+     * @param node
+     * @return boolean
+     */
+    private boolean isRDGNodeEqualsTo(RDGNode node) {
+    	return this.getPresenceCondition().equals(node.getPresenceCondition())
+                && this.getFDTMC().equals(node.getFDTMC())
+                && this.getDependencies().equals(node.getDependencies());
+    }
+    
     @Override
     public int hashCode() {
         return id.hashCode() + presenceCondition.hashCode() + fdtmc.hashCode() + dependencies.hashCode();
@@ -132,117 +142,10 @@ public class RDGNode {
      */
     public List<RDGNode> getDependenciesTransitiveClosure() throws CyclicRdgException {
         List<RDGNode> transitiveDependencies = new LinkedList<RDGNode>();
-        executeTopologicalSortVisit(transitiveDependencies);
+        topologicalSort.executeTopologicalSortVisit(transitiveDependencies,this);
         return transitiveDependencies;
     }
     
-    /**
-     * Execute {@link #topoSortVisit(RDGNode, Map, List)} to get one sort graph
-     *
-     * @param transitiveDependencies
-     */
-    public void executeTopologicalSortVisit(List<RDGNode> transitiveDependencies) {
-    	Map<RDGNode, Boolean> marks = new HashMap<RDGNode, Boolean>();
-    	topoSortVisit(this, marks, transitiveDependencies);
-    }
-    
-    private static boolean isRunningTopologicalSort(RDGNode node, Map<RDGNode, Boolean> marks) {
-    	boolean isRunning = false;
-
-    	if (marks.containsKey(node) && marks.get(node) == false) {
-	        // Visiting temporarily marked node -- this means a cyclic dependency!
-	        throw new CyclicRdgException();
-	    } else if (!marks.containsKey(node)) {
-	    	isRunning = true;
-	    }
-
-	    return isRunning;
-    }
-
-    /**
-     * Topological sort {@code visit} function (Cormen et al.'s algorithm).
-     * @param node
-     * @param marks
-     * @param sorted
-     * @throws CyclicRdgException
-     */
-    private void topoSortVisit(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted) throws CyclicRdgException {
-        if (isRunningTopologicalSort(node,marks)){
-            // Mark node temporarily (cycle detection)
-            marks.put(node, false);
-            for (RDGNode child: node.getDependencies()) {
-                topoSortVisit(child, marks, sorted);
-            }
-            // Mark node permanently (finished sorting branch)
-            marks.put(node, true);
-            sorted.add(node);
-        }
-    }
-
-    /**
-     * Computes the number of paths from source nodes to every known node.
-     * @return A map associating an RDGNode to the corresponding number
-     *      of paths from a source node which lead to it.
-     * @throws CyclicRdgException
-     */
-    public Map<RDGNode, Integer> getNumberOfPaths() throws CyclicRdgException {
-        Map<RDGNode, Integer> numberOfPaths = new HashMap<RDGNode, Integer>();
-        Map<RDGNode, Integer> tmpNumberOfPaths = getTmpNumberOfPaths();
-        
-        numberOfPaths = sumPaths(numberOfPaths, tmpNumberOfPaths);
-
-        return numberOfPaths;
-    }
-    
-    private Map<RDGNode, Integer> getTmpNumberOfPaths(){
-    	Map<RDGNode, Boolean> marks = new HashMap<RDGNode, Boolean>();
-        Map<RDGNode, Map<RDGNode, Integer>> cache = new HashMap<RDGNode, Map<RDGNode,Integer>>();
-        return numPathsVisit(this, marks, cache);
-    }
-
-    // TODO Parameterize topological sort of RDG.
-    private static Map<RDGNode, Integer> numPathsVisit(RDGNode node, Map<RDGNode, Boolean> marks, Map<RDGNode, Map<RDGNode, Integer>> cache) throws CyclicRdgException {
-    	if (isRunningTopologicalSort(node,marks)){
-            // Mark node temporarily (cycle detection)
-            marks.put(node, false);
-
-            Map<RDGNode, Integer> numberOfPaths = new HashMap<RDGNode, Integer>();
-            // A node always has a path to itself.
-            numberOfPaths.put(node, 1);
-            // The number of paths from a node X to a node Y is equal to the
-            // sum of the numbers of paths from each of its descendants to Y.
-            for (RDGNode child: node.getDependencies()) {
-                Map<RDGNode, Integer> tmpNumberOfPaths = numPathsVisit(child, marks, cache);
-                numberOfPaths = sumPaths(numberOfPaths, tmpNumberOfPaths);
-            }
-            // Mark node permanently (finished sorting branch)
-            marks.put(node, true);
-            cache.put(node, numberOfPaths);
-            return numberOfPaths;
-        }
-        // Otherwise, the node has already been visited.
-        return cache.get(node);
-    }
-
-    /**
-     * Sums two paths-counting maps
-     * @param pathsCountA
-     * @param pathsCountB
-     * @return
-     */
-    private static Map<RDGNode, Integer> sumPaths(Map<RDGNode, Integer> pathsCountA, Map<RDGNode, Integer> pathsCountB) {
-        Map<RDGNode, Integer> numberOfPaths = new HashMap<RDGNode, Integer>(pathsCountA);
-        for (Map.Entry<RDGNode, Integer> entry: pathsCountB.entrySet()) {
-            RDGNode node = entry.getKey();
-            Integer count = entry.getValue();
-            if (numberOfPaths.containsKey(node)) {
-                count += numberOfPaths.get(node);
-            }
-            numberOfPaths.put(node, count);
-        }
-        return numberOfPaths;
-    }
-
     /**
      * Returns the first RDG node (in crescent order of creation time) which is similar
      * to the one provided.
