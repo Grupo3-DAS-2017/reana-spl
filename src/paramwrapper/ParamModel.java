@@ -122,7 +122,7 @@ class ParamModel {
 	public String toString() {
 		Module module = new Module();
 		String params = "";
-		for (String parameter : parameters) {
+		for (String parameter : getParameters()) {
 			params += "param double "+parameter+";\n";
 		}
 		

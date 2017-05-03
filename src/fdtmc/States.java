@@ -2,9 +2,9 @@ package fdtmc;
 
 public class States {
     
-	public State initial;
-    public State success;
-    public State error;
+	private State initial;
+	private State success;
+	private State error;
 	
     
     public State getInitial() {
