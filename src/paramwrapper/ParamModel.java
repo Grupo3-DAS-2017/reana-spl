@@ -34,7 +34,7 @@ class ParamModel {
 	private int stateRangeEnd;
 
 	public ParamModel(FDTMC fdtmc) {
-		if (fdtmc.getVariableName() != null) {
+		if (isValidValue(fdtmc.getVariableName())) {
 			stateVariable = fdtmc.getVariableName();
 		}
 		initialState = fdtmc.getInitialState().getIndex();
@@ -64,7 +64,7 @@ class ParamModel {
 		Collection<State> states = fdtmc.getStates();
 		for (State s : states) {
 			String label = s.getLabel();
-			if (label != null && !label.isEmpty()) {
+			if (isValidValue(label)) {
 				if (!labeledStates.containsKey(label)) {
 					labeledStates.put(label, new TreeSet<Integer>());
 				}
@@ -74,6 +74,8 @@ class ParamModel {
 		return labeledStates;
 	}
 
+
+	
 	private Map<Integer, Command> getCommands(FDTMC fdtmc) {
 		Map<Integer, Command> tmpCommands = new TreeMap<Integer, Command>();
 		for (Entry<State, List<Transition>> entry : fdtmc.getTransitions().entrySet()) {
@@ -89,7 +91,7 @@ class ParamModel {
 	private Command generateCommand(Entry<State, List<Transition>> entry, int initState ){
 		
 		Command command = new Command(initState);
-		if (entry.getValue() != null) {
+		if (isValidValue(entry.getValue())) {
 		    for (Transition transition : entry.getValue()) {
 		        command.addUpdate(transition.getProbability(),
 		                          transition.getTarget().getIndex());
@@ -142,6 +144,18 @@ class ParamModel {
 		}
 		return module.getResult();
 	}
+	
+	private boolean isValidValue(Object value){
+		boolean isValid = false;
+		if(value.getClass().equals(String.class)){
+			isValid = value != null && !((String) value).isEmpty();
+		}else{
+			isValid = value != null;
+		}
+		
+		return isValid;
+	}
+	
 }
 
 class Command {
