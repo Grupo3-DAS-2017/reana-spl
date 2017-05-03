@@ -103,7 +103,7 @@ public class RDGNode {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj != null && obj instanceof RDGNode) { 
+        if (this.isRDGNodeObject(obj)) { 
             return this.isRDGNodeEqualsTo((RDGNode) obj);
         } 
         
@@ -119,6 +119,10 @@ public class RDGNode {
     	return this.getPresenceCondition().equals(node.getPresenceCondition())
                 && this.getFDTMC().equals(node.getFDTMC())
                 && this.getDependencies().equals(node.getDependencies());
+    }
+    
+    private boolean isRDGNodeObject(Object obj) {
+    	return (obj != null && obj instanceof RDGNode);
     }
     
     @Override
