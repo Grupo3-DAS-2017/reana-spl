@@ -20,15 +20,24 @@ public class TopologicalSort {
     public static boolean isRunningTopologicalSort(RDGNode node, Map<RDGNode, Boolean> marks) {
     	boolean isRunning = false;
 
-    	if (marks.containsKey(node) && marks.get(node) == false) {
+    	if (isCyclicedDependency(node, marks)) {
 	        // Visiting temporarily marked node -- this means a cyclic dependency!
 	        throw new CyclicRdgException();
-	    } else if (!marks.containsKey(node)) {
+	    } else if (itContainNode(node, marks)) {
 	    	isRunning = true;
 	    }
 
 	    return isRunning;
     }
+    
+    private static boolean isCyclicedDependency(RDGNode node, Map<RDGNode, Boolean> marks) {
+    	return (marks.containsKey(node) && marks.get(node) == false);
+    }
+    
+    private static boolean itContainNode(RDGNode node, Map<RDGNode, Boolean> marks) {
+    	return (!marks.containsKey(node));
+    }
+    
     
     /**
      * Topological sort {@code visit} function (Cormen et al.'s algorithm).
