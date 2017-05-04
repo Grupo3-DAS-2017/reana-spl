@@ -17,8 +17,6 @@ import fdtmc.FDTMC;
 import fdtmc.State;
 import fdtmc.Transition;
 
-
-
 class ParamModel {
 	private String stateVariable = "s";
 	// TODO Deixar nome do módulo PARAM configurável.
@@ -74,6 +72,8 @@ class ParamModel {
 		return labeledStates;
 	}
 
+
+	
 	private Map<Integer, Command> getCommands(FDTMC fdtmc) {
 		Map<Integer, Command> tmpCommands = new TreeMap<Integer, Command>();
 		for (Entry<State, List<Transition>> entry : fdtmc.getTransitions().entrySet()) {
